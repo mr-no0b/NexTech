@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Edit Product')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="d-flex" style="min-height:calc(100vh - 70px)">
+  <div class="dash-sidebar d-none d-lg-block" style="width:240px;flex-shrink:0;">
+    <nav class="nav flex-column mt-3">
+      <a class="nav-link" th:href="@{/seller/dashboard}"><i class="fa fa-gauge me-2"></i>Dashboard</a>
+      <a class="nav-link active" th:href="@{/seller/products}"><i class="fa fa-box me-2"></i>My Products</a>
+      <a class="nav-link" th:href="@{/seller/products/add}"><i class="fa fa-plus me-2"></i>Add Product</a>
+    </nav>
+  </div>
+
+  <div class="dash-content flex-grow-1" style="max-width:720px;">
+    <div class="mb-4">
+      <h2 class="fw-800 mb-1">Edit Product</h2>
+      <p style="color:var(--text-muted)">Changes will reset product status to Pending for re-approval.</p>
+    </div>
+
+    <div class="stat-card">
+      <form th:action="@{/seller/products/{id}/edit(id=${productId})}"
+            th:object="${productDto}" method="post" class="form-nextech">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Product Name *</label>
+            <input type="text" th:field="*{name}" class="form-control"
+                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"/>
+            <div class="invalid-feedback" th:errors="*{name}"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description *</label>
+            <textarea th:field="*{description}" class="form-control" rows="4"
+                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+            <div class="invalid-feedback" th:errors="*{description}"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Price (USD) *</label>
+            <div class="position-relative">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)">$</span>
+              <input type="number" th:field="*{price}" class="form-control"
+                     th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
+                     step="0.01" min="0.01" style="padding-left:26px"/>
+            </div>
+            <div class="invalid-feedback" th:errors="*{price}"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Stock Quantity *</label>
+            <input type="number" th:field="*{stock}" class="form-control"
+                   th:classappend="${#fields.hasErrors('stock')} ? 'is-invalid'" min="0"/>
+            <div class="invalid-feedback" th:errors="*{stock}"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Category *</label>
+            <select th:field="*{categoryId}" class="form-select"
+                    th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+              <option value="">— Select a category —</option>
+              <option th:each="cat : ${categories}"
+                      th:value="${cat.id}"
+                      th:text="${cat.name}">
+              </option>
+            </select>
+            <div class="invalid-feedback" th:errors="*{categoryId}"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Image URL (optional)</label>
+            <input type="url" th:field="*{imageUrl}" class="form-control"
+                   placeholder="https://example.com/image.jpg"/>
+          </div>
+        </div>
+        <hr class="divider-nextech"/>
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn-nextech btn-nextech-primary">
+            <i class="fa fa-floppy-disk"></i> Save Changes
+          </button>
+          <a th:href="@{/seller/products}" class="btn-nextech btn-nextech-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

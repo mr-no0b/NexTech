@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin – Users')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="d-flex" style="min-height:calc(100vh - 70px)">
+  <div class="dash-sidebar d-none d-lg-block" style="width:240px;flex-shrink:0;">
+    <nav class="nav flex-column mt-3">
+      <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fa fa-gauge me-2"></i>Dashboard</a>
+      <a class="nav-link" th:href="@{/admin/products?status=PENDING}"><i class="fa fa-box me-2"></i>Product Approvals</a>
+      <a class="nav-link active" th:href="@{/admin/users}"><i class="fa fa-users me-2"></i>Users</a>
+      <a class="nav-link" th:href="@{/admin/orders}"><i class="fa fa-bag-shopping me-2"></i>Orders</a>
+    </nav>
+  </div>
+
+  <div class="dash-content flex-grow-1">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="mb-4">
+      <h2 class="fw-800 mb-1">User Management</h2>
+      <p style="color:var(--text-muted)">View and manage all registered accounts</p>
+    </div>
+
+    <div class="rounded-nextech border-nextech overflow-auto">
+      <table class="table table-nextech mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Shop Name</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="u : ${users}">
+            <td style="color:var(--text-muted)" th:text="${u.id}"></td>
+            <td>
+              <div style="font-weight:600" th:text="${u.fullName}"></div>
+              <div style="font-size:.75rem;color:var(--text-muted)" th:text="'@' + ${u.username}"></div>
+            </td>
+            <td style="font-size:.85rem" th:text="${u.email}"></td>
+            <td>
+              <span th:each="role : ${u.roles}"
+                    class="badge-nextech me-1"
+                    th:classappend="${role.name.name() == 'ROLE_ADMIN'} ? ' badge-pending' : (${role.name.name() == 'ROLE_SELLER'} ? ' badge-blue' : ' badge-approved')"
+                    th:text="${role.name.name().replace('ROLE_','')}">
+              </span>
+            </td>
+            <td style="font-size:.85rem;color:var(--text-secondary)"
+                th:text="${u.shopName ?: '—'}"></td>
+            <td style="font-size:.8rem;color:var(--text-muted)"
+                th:text="${#temporals.format(u.createdAt,'dd MMM yyyy')}"></td>
+            <td>
+              <span th:if="${u.enabled}" class="stock-in"><i class="fa fa-circle-check me-1"></i>Active</span>
+              <span th:unless="${u.enabled}" class="stock-out"><i class="fa fa-ban me-1"></i>Disabled</span>
+            </td>
+            <td>
+              <form th:action="@{/admin/users/{id}/toggle(id=${u.id})}" method="post">
+                <button type="submit"
+                        class="btn-nextech btn-nextech-sm"
+                        th:classappend="${u.enabled} ? ' btn-nextech-danger' : ' btn-nextech-success'"
+                        th:text="${u.enabled} ? 'Disable' : 'Enable'">
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
