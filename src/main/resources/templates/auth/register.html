@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Register')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="auth-wrapper" style="align-items:flex-start;padding:3rem 0;">
+  <div class="container py-4">
+    <div class="auth-card mx-auto" style="max-width:560px;">
+      <a class="auth-logo" th:href="@{/}">
+        <i class="fa fa-microchip me-2"></i>NexTech
+      </a>
+      <h2 class="mt-2">Create Account</h2>
+      <p class="subtitle">Join thousands of tech enthusiasts</p>
+
+      <div th:if="${error}" class="alert-nextech alert-error-nextech mb-3">
+        <i class="fa fa-triangle-exclamation"></i>
+        <span th:text="${error}"></span>
+      </div>
+
+      <form th:action="@{/register}" th:object="${registrationDto}"
+            method="post" class="form-nextech" id="regForm">
+
+        <!-- Role selector tabs -->
+        <div class="d-flex gap-2 mb-4 p-1 rounded-nextech border-nextech">
+          <label class="flex-fill text-center py-2 px-3 rounded"
+                 style="cursor:pointer;transition:all .2s;" id="buyerTab">
+            <input type="radio" th:field="*{role}" value="BUYER"
+                   class="d-none" onchange="switchRole(this)"/>
+            <i class="fa fa-user me-2"></i>Buyer
+          </label>
+          <label class="flex-fill text-center py-2 px-3 rounded"
+                 style="cursor:pointer;transition:all .2s;" id="sellerTab">
+            <input type="radio" th:field="*{role}" value="SELLER"
+                   class="d-none" onchange="switchRole(this)"/>
+            <i class="fa fa-store me-2"></i>Seller
+          </label>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Username *</label>
+            <input type="text" th:field="*{username}" class="form-control"
+                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                   placeholder="e.g. techguy42"/>
+            <div class="invalid-feedback" th:errors="*{username}"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Full Name *</label>
+            <input type="text" th:field="*{fullName}" class="form-control"
+                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                   placeholder="Your full name"/>
+            <div class="invalid-feedback" th:errors="*{fullName}"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Email Address *</label>
+            <input type="email" th:field="*{email}" class="form-control"
+                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                   placeholder="you@example.com"/>
+            <div class="invalid-feedback" th:errors="*{email}"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Password *</label>
+            <input type="password" th:field="*{password}" class="form-control"
+                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                   placeholder="At least 6 characters"/>
+            <div class="invalid-feedback" th:errors="*{password}"></div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Confirm Password *</label>
+            <input type="password" th:field="*{confirmPassword}" class="form-control"
+                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                   placeholder="Repeat password"/>
+            <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Phone (optional)</label>
+            <input type="tel" th:field="*{phone}" class="form-control"
+                   placeholder="+1 234 567 8900"/>
+          </div>
+
+          <!-- Seller-only field -->
+          <div class="col-12" id="shopNameField" style="display:none;">
+            <label class="form-label">Shop Name *</label>
+            <input type="text" th:field="*{shopName}" class="form-control"
+                   th:classappend="${#fields.hasErrors('shopName')} ? 'is-invalid'"
+                   placeholder="Your store name on NexTech"/>
+            <div class="invalid-feedback" th:errors="*{shopName}"></div>
+          </div>
+        </div>
+
+        <button type="submit"
+                class="btn-nextech btn-nextech-primary w-100 justify-content-center mt-4">
+          <i class="fa fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+      <hr class="divider-nextech"/>
+      <p class="text-center mb-0" style="font-size:.875rem;color:var(--text-muted)">
+        Already have an account?
+        <a th:href="@{/login}" style="color:var(--accent-blue);font-weight:600;">
+          Sign in →
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+const activeStyle = 'background:rgba(59,130,246,0.15);color:var(--accent-blue);font-weight:600;';
+const inactiveStyle = 'color:var(--text-muted);';
+
+function switchRole(radio) {
+  document.getElementById('buyerTab').style.cssText  = radio.value==='BUYER'  ? activeStyle : inactiveStyle;
+  document.getElementById('sellerTab').style.cssText = radio.value==='SELLER' ? activeStyle : inactiveStyle;
+  document.getElementById('shopNameField').style.display = radio.value==='SELLER' ? 'block' : 'none';
+}
+
+// Init — check if role was already selected (e.g. on validation error re-render)
+window.addEventListener('DOMContentLoaded', () => {
+  const checked = document.querySelector('input[name="role"]:checked');
+  if (checked) switchRole(checked);
+  else {
+    // Default: highlight buyer
+    document.getElementById('buyerTab').style.cssText = activeStyle;
+    // pre-check buyer radio
+    const buyerRadio = document.querySelector('input[name="role"][value="BUYER"]');
+    if (buyerRadio) buyerRadio.checked = true;
+  }
+});
+</script>
+</body>
+</html>
