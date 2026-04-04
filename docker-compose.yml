@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: nextech-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-nextech_db}
+      POSTGRES_USER: ${DB_USER:-nextech}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nextech123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-nextech} -d ${DB_NAME:-nextech_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: nextech-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-nextech_db}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-nextech}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-nextech123}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_THYMELEAF_CACHE: "true"
+
+volumes:
+  postgres_data:
