@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Product Catalog')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header">
+  <div class="container">
+    <h1><i class="fa fa-store me-2 text-accent-blue"></i>Product Catalog</h1>
+    <p>Browse all available tech products</p>
+  </div>
+</div>
+
+<section class="section-nextech-sm">
+  <div class="container">
+
+    <!-- ── Filters ─────────────────────────────────────────────────────── -->
+    <form th:action="@{/products}" method="get" class="row g-3 mb-4 align-items-end">
+      <div class="col-md-5">
+        <div class="search-bar">
+          <i class="fa fa-magnifying-glass search-icon"></i>
+          <input type="text" name="search" class="form-control"
+                 placeholder="Search products..."
+                 th:value="${search}"/>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <select name="categoryId" class="form-select form-nextech"
+                style="background:var(--bg-card);border:1.5px solid var(--border-color);color:var(--text-primary);border-radius:50px;height:44px;">
+          <option value="">All Categories</option>
+          <option th:each="cat : ${categories}"
+                  th:value="${cat.id}"
+                  th:text="${cat.name}"
+                  th:selected="${selectedCategory != null and selectedCategory == cat.id}">
+          </option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn-nextech btn-nextech-primary flex-fill justify-content-center">
+          <i class="fa fa-filter"></i> Filter
+        </button>
+        <a th:href="@{/products}" class="btn-nextech btn-nextech-outline">
+          <i class="fa fa-xmark"></i>
+        </a>
+      </div>
+    </form>
+
+    <!-- ── Category pills ─────────────────────────────────────────────── -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+      <a th:href="@{/products}"
+         class="badge-nextech"
+         th:classappend="${selectedCategory == null} ? ' badge-blue' : ' badge-pending'">
+        All
+      </a>
+      <a th:each="cat : ${categories}"
+         th:href="@{/products(categoryId=${cat.id})}"
+         class="badge-nextech"
+         th:classappend="${selectedCategory != null and selectedCategory == cat.id} ? ' badge-approved' : ' badge-pending'"
+         th:text="${cat.name}">Category</a>
+    </div>
+
+    <!-- ── Product Grid ────────────────────────────────────────────────── -->
+    <div class="row g-4" th:if="${not #lists.isEmpty(products)}">
+      <div class="col-sm-6 col-md-4 col-xl-3" th:each="product : ${products}">
+        <div class="product-card" onclick="window.location=this.dataset.href"
+             th:attr="data-href=@{/product/{id}(id=${product.id})}">
+          <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+               th:src="${product.imageUrl}" class="product-card-img"
+               th:alt="${product.name}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="product-card-img-placeholder"
+               th:style="${product.imageUrl != null and !product.imageUrl.isEmpty()} ? 'display:none' : ''">
+            <i class="fa-solid" th:classappend="${product.category.icon}"></i>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-category" th:text="${product.category.name}"></div>
+            <div class="product-card-title" th:text="${product.name}"></div>
+            <div class="product-card-desc" th:text="${product.description}"></div>
+            <div class="product-card-price"
+                 th:text="'$' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}">
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="product-card-seller">
+                <i class="fa fa-store me-1"></i>
+                <span th:text="${product.seller.shopName ?: product.seller.username}"></span>
+              </div>
+              <span th:if="${product.stock > 0 and product.stock <= 5}"
+                    class="stock-low"><i class="fa fa-triangle-exclamation me-1"></i>Low</span>
+              <span th:if="${product.stock == 0}" class="stock-out">Out of stock</span>
+              <span th:if="${product.stock > 5}" class="stock-in">
+                <i class="fa fa-circle-check me-1"></i>In Stock
+              </span>
+            </div>
+          </div>
+          <div class="product-card-footer">
+            <a th:href="@{/product/{id}(id=${product.id})}"
+               class="btn-nextech btn-nextech-primary w-100 justify-content-center"
+               onclick="event.stopPropagation()">
+              <i class="fa fa-eye"></i> View Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(products)}" class="text-center py-5">
+      <i class="fa fa-magnifying-glass fa-3x mb-3" style="color:var(--text-muted)"></i>
+      <h5 style="color:var(--text-secondary)">No products found</h5>
+      <p style="color:var(--text-muted)">Try adjusting your filters or search query.</p>
+      <a th:href="@{/products}" class="btn-nextech btn-nextech-outline">Clear Filters</a>
+    </div>
+
+    <!-- ── Pagination ──────────────────────────────────────────────────── -->
+    <div class="pagination-nextech" th:if="${totalPages > 1}">
+      <a th:href="@{/products(page=${currentPage - 1}, categoryId=${selectedCategory}, search=${search})}"
+         class="page-link-nextech"
+         th:classappend="${currentPage == 0} ? ' disabled'"
+         th:if="${currentPage > 0}">
+        <i class="fa fa-chevron-left"></i>
+      </a>
+      <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+         th:href="@{/products(page=${i}, categoryId=${selectedCategory}, search=${search})}"
+         class="page-link-nextech"
+         th:classappend="${i == currentPage} ? ' active'"
+         th:text="${i + 1}">
+      </a>
+      <a th:href="@{/products(page=${currentPage + 1}, categoryId=${selectedCategory}, search=${search})}"
+         class="page-link-nextech"
+         th:if="${currentPage < totalPages - 1}">
+        <i class="fa fa-chevron-right"></i>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

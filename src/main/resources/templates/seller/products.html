@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Products')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="d-flex" style="min-height:calc(100vh - 70px)">
+  <div class="dash-sidebar d-none d-lg-block" style="width:240px;flex-shrink:0;">
+    <nav class="nav flex-column mt-3">
+      <a class="nav-link" th:href="@{/seller/dashboard}"><i class="fa fa-gauge me-2"></i>Dashboard</a>
+      <a class="nav-link active" th:href="@{/seller/products}"><i class="fa fa-box me-2"></i>My Products</a>
+      <a class="nav-link" th:href="@{/seller/products/add}"><i class="fa fa-plus me-2"></i>Add Product</a>
+    </nav>
+  </div>
+
+  <div class="dash-content flex-grow-1">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h2 class="fw-800 mb-1">My Products</h2>
+        <p style="color:var(--text-muted)" th:text="${products.size()} + ' total listings'"></p>
+      </div>
+      <a th:href="@{/seller/products/add}"
+         class="btn-nextech btn-nextech-primary">
+        <i class="fa fa-plus"></i> Add Product
+      </a>
+    </div>
+
+    <div class="rounded-nextech border-nextech overflow-auto"
+         th:if="${not #lists.isEmpty(products)}">
+      <table class="table table-nextech mb-0">
+        <thead>
+          <tr>
+            <th>Product</th><th>Category</th><th>Price</th>
+            <th>Stock</th><th>Status</th><th>Added</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="p : ${products}">
+            <td>
+              <div style="font-weight:600;max-width:200px" th:text="${p.name}"></div>
+              <div th:if="${p.rejectionReason != null}"
+                   style="font-size:.73rem;color:var(--danger);margin-top:2px"
+                   th:text="'Rejected: ' + ${p.rejectionReason}"></div>
+            </td>
+            <td><span class="badge-nextech badge-blue" th:text="${p.category.name}"></span></td>
+            <td style="font-weight:700;color:var(--accent-blue)"
+                th:text="'$' + ${#numbers.formatDecimal(p.price,1,'COMMA',2,'POINT')}"></td>
+            <td th:text="${p.stock}"></td>
+            <td>
+              <span class="badge-nextech"
+                    th:classappend="${p.status.name() == 'PENDING'} ? ' badge-pending'
+                                  : (${p.status.name() == 'APPROVED'} ? ' badge-approved' : ' badge-rejected')"
+                    th:text="${p.status}">
+              </span>
+            </td>
+            <td style="font-size:.8rem;color:var(--text-muted)"
+                th:text="${#temporals.format(p.createdAt,'dd MMM yyyy')}"></td>
+            <td>
+              <div class="d-flex gap-1">
+                <a th:href="@{/seller/products/{id}/edit(id=${p.id})}"
+                   class="btn-nextech btn-nextech-outline btn-nextech-sm" title="Edit">
+                  <i class="fa fa-pen"></i>
+                </a>
+                <form th:action="@{/seller/products/{id}/delete(id=${p.id})}" method="post"
+                      onsubmit="return confirm('Delete this product?')">
+                  <button type="submit"
+                          class="btn-nextech btn-nextech-danger btn-nextech-sm" title="Delete">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:if="${#lists.isEmpty(products)}" class="text-center py-5">
+      <i class="fa fa-box-open fa-2x mb-3" style="color:var(--text-muted)"></i>
+      <p style="color:var(--text-muted)">You haven't listed any products yet.</p>
+      <a th:href="@{/seller/products/add}" class="btn-nextech btn-nextech-primary">
+        <i class="fa fa-plus"></i> Add Your First Product
+      </a>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Error')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container py-5 text-center" style="min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="font-size:7rem;font-weight:800;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));
+              -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:.5rem;"
+       th:text="${status != null} ? ${status} : '500'">500</div>
+
+  <h2 class="fw-700 mb-2" th:text="${error != null} ? ${error} : 'An Unexpected Error Occurred'">
+    An Unexpected Error Occurred
+  </h2>
+
+  <p style="color:var(--text-muted);max-width:480px;margin:0 auto 2rem"
+     th:text="${message != null} ? ${message} : 'Something went wrong on our end. Please try again later.'">
+  </p>
+
+  <div class="d-flex gap-3 justify-content-center flex-wrap">
+    <a th:href="@{/}" class="btn-nextech btn-nextech-primary">
+      <i class="fa fa-house"></i> Go Home
+    </a>
+    <a href="javascript:history.back()" class="btn-nextech btn-nextech-outline">
+      <i class="fa fa-arrow-left"></i> Go Back
+    </a>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

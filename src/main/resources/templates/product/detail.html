@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${product.name})}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<section class="section-nextech-sm">
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb" style="background:none;padding:0;font-size:.85rem;">
+        <li class="breadcrumb-item"><a th:href="@{/}" style="color:var(--text-muted)">Home</a></li>
+        <li class="breadcrumb-item"><a th:href="@{/products}" style="color:var(--text-muted)">Products</a></li>
+        <li class="breadcrumb-item active" style="color:var(--text-secondary)"
+            th:text="${product.name}">Product</li>
+      </ol>
+    </nav>
+
+    <div class="row g-5">
+      <!-- Product Image -->
+      <div class="col-lg-5">
+        <div class="rounded-nextech border-nextech overflow-hidden"
+             style="background:var(--bg-card);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;">
+          <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+               th:src="${product.imageUrl}" th:alt="${product.name}"
+               style="width:100%;height:100%;object-fit:cover;"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="product-card-img-placeholder"
+               style="width:100%;height:300px;"
+               th:style="${product.imageUrl != null and !product.imageUrl.isEmpty()} ? 'display:none;width:100%;height:300px' : 'width:100%;height:300px'">
+            <i class="fa-solid fa-3x" th:classappend="${product.category.icon}"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="col-lg-7">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge-nextech badge-blue"
+                th:text="${product.category.name}">Category</span>
+          <span th:if="${product.stock > 0}" class="stock-in">
+            <i class="fa fa-circle-check me-1"></i>
+            <span th:text="${product.stock} + ' in stock'">In Stock</span>
+          </span>
+          <span th:if="${product.stock == 0}" class="stock-out">
+            <i class="fa fa-circle-xmark me-1"></i>Out of Stock
+          </span>
+        </div>
+
+        <h1 class="fw-800 mb-2" style="font-size:1.9rem" th:text="${product.name}">Name</h1>
+
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span style="font-size:2.2rem;font-weight:900;color:var(--accent-blue)"
+                th:text="'$' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}">
+          </span>
+        </div>
+
+        <p style="color:var(--text-secondary);line-height:1.75;font-size:.95rem;margin-bottom:1.5rem"
+           th:text="${product.description}">Description</p>
+
+        <div class="d-flex flex-wrap gap-3 mb-4"
+             style="font-size:.85rem;color:var(--text-muted)">
+          <div>
+            <i class="fa fa-store me-1 text-accent-blue"></i>
+            Sold by:
+            <strong style="color:var(--text-secondary)"
+                    th:text="${product.seller.shopName ?: product.seller.username}">Seller</strong>
+          </div>
+          <div>
+            <i class="fa fa-tag me-1 text-accent-cyan"></i>
+            Category:
+            <strong style="color:var(--text-secondary)"
+                    th:text="${product.category.name}">Cat</strong>
+          </div>
+        </div>
+
+        <!-- Add to Cart form (buyers only) -->
+        <div sec:authorize="hasRole('BUYER')" th:if="${product.stock > 0}">
+          <form th:action="@{/cart/add}" method="post" class="d-flex gap-3 align-items-center">
+            <input type="hidden" name="productId" th:value="${product.id}"/>
+            <div>
+              <label class="form-label" style="font-size:.8rem;color:var(--text-muted)">QTY</label>
+              <input type="number" name="quantity" class="qty-input"
+                     value="1" min="1" th:max="${product.stock}"/>
+            </div>
+            <button type="submit"
+                    class="btn-nextech btn-nextech-primary"
+                    style="padding:12px 28px;font-size:1rem;">
+              <i class="fa fa-cart-plus"></i> Add to Cart
+            </button>
+          </form>
+        </div>
+
+        <div th:if="${product.stock == 0}" class="alert-nextech alert-error-nextech mt-2" style="display:inline-flex">
+          <i class="fa fa-clock"></i> Product currently out of stock
+        </div>
+
+        <div sec:authorize="isAnonymous()" class="mt-3">
+          <a th:href="@{/login}" class="btn-nextech btn-nextech-outline">
+            <i class="fa fa-right-to-bracket"></i> Login to Purchase
+          </a>
+        </div>
+
+        <a th:href="@{/products}" class="btn-nextech btn-nextech-outline mt-3 ms-2">
+          <i class="fa fa-arrow-left"></i> Back to Products
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

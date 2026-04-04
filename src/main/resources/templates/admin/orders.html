@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin – Orders')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="d-flex" style="min-height:calc(100vh - 70px)">
+  <div class="dash-sidebar d-none d-lg-block" style="width:240px;flex-shrink:0;">
+    <nav class="nav flex-column mt-3">
+      <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fa fa-gauge me-2"></i>Dashboard</a>
+      <a class="nav-link" th:href="@{/admin/products?status=PENDING}"><i class="fa fa-box me-2"></i>Product Approvals</a>
+      <a class="nav-link" th:href="@{/admin/users}"><i class="fa fa-users me-2"></i>Users</a>
+      <a class="nav-link active" th:href="@{/admin/orders}"><i class="fa fa-bag-shopping me-2"></i>Orders</a>
+    </nav>
+  </div>
+
+  <div class="dash-content flex-grow-1">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+    <div class="mb-4">
+      <h2 class="fw-800 mb-1">Order Management</h2>
+      <p style="color:var(--text-muted)">View and update all platform orders</p>
+    </div>
+
+    <div class="rounded-nextech border-nextech overflow-auto">
+      <table class="table table-nextech mb-0">
+        <thead>
+          <tr>
+            <th>Order #</th><th>Buyer</th><th>Items</th>
+            <th>Total</th><th>Status</th><th>Date</th><th>Update</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="o : ${orders}">
+            <td style="font-weight:700;color:var(--accent-blue)" th:text="'#' + ${o.id}"></td>
+            <td>
+              <div th:text="${o.buyer.fullName}"></div>
+              <div style="font-size:.75rem;color:var(--text-muted)" th:text="${o.buyer.email}"></div>
+            </td>
+            <td th:text="${o.items.size()} + ' item(s)'"></td>
+            <td style="font-weight:700;color:var(--success)"
+                th:text="'$' + ${#numbers.formatDecimal(o.totalAmount,1,'COMMA',2,'POINT')}"></td>
+            <td>
+              <span class="badge-nextech"
+                    th:classappend="${o.status.name() == 'PENDING'} ? ' badge-pending'
+                                  : (${o.status.name() == 'DELIVERED'} ? ' badge-approved'
+                                  : (${o.status.name() == 'CANCELLED'} ? ' badge-rejected'
+                                  : ' badge-blue'))"
+                    th:text="${o.status}">
+              </span>
+            </td>
+            <td style="font-size:.8rem;color:var(--text-muted)"
+                th:text="${#temporals.format(o.createdAt,'dd MMM yyyy')}"></td>
+            <td>
+              <form th:action="@{/admin/orders/{id}/status(id=${o.id})}" method="post"
+                    class="d-flex gap-1">
+                <select name="status"
+                        style="background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-primary);border-radius:6px;padding:4px 8px;font-size:.8rem;">
+                  <option th:each="s : ${T(com.nextech.entity.OrderStatus).values()}"
+                          th:value="${s}" th:text="${s}"
+                          th:selected="${o.status == s}">
+                  </option>
+                </select>
+                <button type="submit" class="btn-nextech btn-nextech-primary btn-nextech-sm">
+                  <i class="fa fa-floppy-disk"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5">
+      <i class="fa fa-bag-shopping fa-2x mb-3" style="color:var(--text-muted)"></i>
+      <p style="color:var(--text-muted)">No orders yet.</p>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

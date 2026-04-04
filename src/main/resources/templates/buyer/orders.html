@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Orders')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-800 mb-0"><i class="fa fa-bag-shopping text-accent-blue me-2"></i>My Orders</h2>
+    <a th:href="@{/products}" class="btn-nextech btn-nextech-primary">
+      <i class="fa fa-store"></i> Keep Shopping
+    </a>
+  </div>
+
+  <div th:if="${#lists.isEmpty(orders)}" class="text-center py-5">
+    <i class="fa fa-bag-shopping fa-4x mb-3" style="color:var(--text-muted)"></i>
+    <h4 style="color:var(--text-secondary)">No orders yet</h4>
+    <p style="color:var(--text-muted)">Once you place an order it will appear here.</p>
+    <a th:href="@{/products}" class="btn-nextech btn-nextech-primary mt-2">
+      <i class="fa fa-store"></i> Browse Products
+    </a>
+  </div>
+
+  <div th:unless="${#lists.isEmpty(orders)}" class="rounded-nextech border-nextech overflow-hidden">
+    <table class="table table-nextech mb-0">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Shipping Address</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="o : ${orders}">
+          <td style="font-weight:700;color:var(--accent-blue)" th:text="'#' + ${o.id}"></td>
+          <td th:text="${o.items.size()} + ' item(s)'"></td>
+          <td style="font-weight:700;color:var(--success)"
+              th:text="'$' + ${#numbers.formatDecimal(o.totalAmount,1,'COMMA',2,'POINT')}"></td>
+          <td style="font-size:.82rem;color:var(--text-secondary);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+              th:text="${o.shippingAddress}" th:title="${o.shippingAddress}"></td>
+          <td>
+            <span class="badge-nextech"
+                  th:classappend="${o.status.name() == 'PENDING'}    ? ' badge-pending'
+                               : (${o.status.name() == 'CONFIRMED'}  ? ' badge-blue'
+                               : (${o.status.name() == 'SHIPPED'}    ? ' badge-blue'
+                               : (${o.status.name() == 'DELIVERED'}  ? ' badge-approved'
+                               : ' badge-rejected')))"
+                  th:text="${o.status}">
+            </span>
+          </td>
+          <td style="font-size:.8rem;color:var(--text-muted)"
+              th:text="${#temporals.format(o.createdAt,'dd MMM yyyy')}"></td>
+          <td>
+            <a th:href="@{/buyer/orders/{id}(id=${o.id})}" class="btn-nextech btn-nextech-outline py-1"
+               style="font-size:.78rem">
+              View
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
