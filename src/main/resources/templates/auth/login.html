@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Login')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="auth-wrapper">
+  <div class="container py-5">
+    <div class="auth-card mx-auto">
+      <a class="auth-logo" th:href="@{/}">
+        <i class="fa fa-microchip me-2"></i>NexTech
+      </a>
+      <h2 class="mt-2">Welcome Back</h2>
+      <p class="subtitle">Sign in to your account to continue</p>
+
+      <!-- Flash messages -->
+      <div th:if="${param.error}" class="alert-nextech alert-error-nextech mb-3">
+        <i class="fa fa-triangle-exclamation"></i>
+        Invalid username or password. Please try again.
+      </div>
+      <div th:if="${success}" class="alert-nextech alert-success-nextech mb-3">
+        <i class="fa fa-circle-check"></i>
+        <span th:text="${success}"></span>
+      </div>
+      <div th:if="${param.logout}" class="alert-nextech alert-info-nextech mb-3">
+        <i class="fa fa-circle-info"></i>
+        You have been logged out successfully.
+      </div>
+
+      <form th:action="@{/login}" method="post" class="form-nextech">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control"
+                 placeholder="Enter your username" required autofocus/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <div class="position-relative">
+            <input type="password" name="password" id="passwordField"
+                   class="form-control" placeholder="Enter your password" required/>
+            <button type="button"
+                    onclick="togglePwd()"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;">
+              <i class="fa fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-nextech btn-nextech-primary w-100 justify-content-center mt-2">
+          <i class="fa fa-right-to-bracket"></i> Sign In
+        </button>
+      </form>
+
+      <hr class="divider-nextech"/>
+
+      <p class="text-center mb-0" style="font-size:.875rem;color:var(--text-muted)">
+        Don't have an account?
+        <a th:href="@{/register}" style="color:var(--accent-blue);font-weight:600;">
+          Create one →
+        </a>
+      </p>
+
+      <!-- Demo credentials -->
+      <div class="mt-4 p-3 rounded-nextech border-nextech" style="font-size:.78rem;color:var(--text-muted)">
+        <div class="mb-1"><strong style="color:var(--text-secondary)">Demo accounts:</strong></div>
+        <div>Admin: <code style="color:var(--accent-cyan)">admin / admin123</code></div>
+        <div>Seller: <code style="color:var(--accent-cyan)">techseller / seller123</code></div>
+        <div>Buyer: <code style="color:var(--accent-cyan)">buyer1 / buyer123</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+function togglePwd() {
+  const f = document.getElementById('passwordField');
+  const i = document.getElementById('eyeIcon');
+  if (f.type === 'password') { f.type = 'text'; i.className = 'fa fa-eye-slash'; }
+  else { f.type = 'password'; i.className = 'fa fa-eye'; }
+}
+</script>
+</body>
+</html>
