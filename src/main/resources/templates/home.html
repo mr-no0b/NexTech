@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- ── Hero ──────────────────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="mb-3">
+          <span class="badge-nextech badge-blue">
+            <i class="fa fa-bolt me-1"></i>New Arrivals Just Dropped
+          </span>
+        </div>
+        <h1 class="hero-title mb-3">
+          The Future of<br/>
+          <span class="gradient-text">Tech Shopping</span><br/>
+          is Here.
+        </h1>
+        <p class="hero-subtitle mb-4">
+          Discover premium laptops, processors, gaming gear and more —
+          curated from verified sellers and delivered to your door.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a th:href="@{/products}" class="hero-cta hero-cta-primary">
+            <i class="fa fa-rocket"></i> Shop Now
+          </a>
+          <a th:href="@{/register}" class="hero-cta hero-cta-secondary"
+             sec:authorize="isAnonymous()">
+            <i class="fa fa-store"></i> Become a Seller
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="hero-float-card">
+              <div class="icon"><i class="fa fa-box-open"></i></div>
+              <div class="stat-number" th:text="${totalProducts}">0</div>
+              <div class="stat-label">Products Listed</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="hero-float-card mt-4">
+              <div class="icon"><i class="fa fa-store"></i></div>
+              <div class="stat-number">Verified</div>
+              <div class="stat-label">Sellers Only</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="hero-float-card">
+              <div class="icon"><i class="fa fa-shield-halved"></i></div>
+              <div class="stat-number">Secure</div>
+              <div class="stat-label">Safe Checkout</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="hero-float-card mt-4">
+              <div class="icon"><i class="fa fa-truck-fast"></i></div>
+              <div class="stat-number">Fast</div>
+              <div class="stat-label">Order Processing</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Categories ─────────────────────────────────────────────────────── -->
+<section class="section-nextech-sm" style="background:var(--bg-secondary);">
+  <div class="container">
+    <div class="text-center mb-4">
+      <div class="section-divider mx-auto"></div>
+      <h2 class="section-title">Browse Categories</h2>
+      <p class="section-subtitle">Find exactly what you need</p>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2" th:each="cat : ${categories}">
+        <a th:href="@{/products(categoryId=${cat.id})}" class="category-card">
+          <div class="cat-icon"><i class="fa-solid" th:classappend="${cat.icon}"></i></div>
+          <div class="cat-name" th:text="${cat.name}">Category</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Products ──────────────────────────────────────────────── -->
+<section class="section-nextech">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-divider"></div>
+        <h2 class="section-title">Featured Products</h2>
+        <p class="section-subtitle mb-0">Hand-picked top sellers this week</p>
+      </div>
+      <a th:href="@{/products}" class="btn-nextech btn-nextech-outline">
+        View All <i class="fa fa-arrow-right ms-1"></i>
+      </a>
+    </div>
+
+    <div class="row g-4" th:if="${not #lists.isEmpty(featuredProducts)}">
+      <div class="col-sm-6 col-md-4 col-xl-3" th:each="product : ${featuredProducts}">
+        <div class="product-card" onclick="window.location=this.dataset.href"
+             th:attr="data-href=@{/product/{id}(id=${product.id})}">
+          <!-- Image or placeholder -->
+          <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+               th:src="${product.imageUrl}"
+               class="product-card-img" th:alt="${product.name}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="product-card-img-placeholder"
+               th:style="${product.imageUrl != null and !product.imageUrl.isEmpty()} ? 'display:none' : ''">
+            <i class="fa-solid" th:classappend="${product.category.icon}"></i>
+          </div>
+
+          <div class="product-card-body">
+            <div class="product-card-category" th:text="${product.category.name}">Category</div>
+            <div class="product-card-title" th:text="${product.name}">Product Name</div>
+            <div class="product-card-desc" th:text="${product.description}">Description</div>
+            <div class="product-card-price" th:text="'$' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}">$0.00</div>
+            <div class="product-card-seller">
+              <i class="fa fa-store me-1" style="color:var(--text-muted)"></i>
+              <span th:text="${product.seller.shopName ?: product.seller.username}">Seller</span>
+            </div>
+          </div>
+          <div class="product-card-footer">
+            <a th:href="@{/product/{id}(id=${product.id})}"
+               class="btn-nextech btn-nextech-primary w-100"
+               onclick="event.stopPropagation()">
+              <i class="fa fa-eye"></i> View Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(featuredProducts)}" class="text-center py-5">
+      <i class="fa fa-box-open fa-3x mb-3" style="color:var(--text-muted)"></i>
+      <p style="color:var(--text-muted)">No products yet. Check back soon!</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Why NexTech ────────────────────────────────────────────────────── -->
+<section class="section-nextech-sm" style="background:var(--bg-secondary);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-divider mx-auto"></div>
+      <h2 class="section-title">Why Choose NexTech?</h2>
+    </div>
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="stat-card blue h-100">
+          <div class="stat-icon text-accent-blue"><i class="fa fa-shield-halved"></i></div>
+          <h5 class="fw-700 mb-2">Admin Verified</h5>
+          <p style="color:var(--text-muted);font-size:.875rem;margin:0">
+            Every product listing goes through our approval process before being published.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card cyan h-100">
+          <div class="stat-icon text-accent-cyan"><i class="fa fa-award"></i></div>
+          <h5 class="fw-700 mb-2">Quality Guaranteed</h5>
+          <p style="color:var(--text-muted);font-size:.875rem;margin:0">
+            Only authorised sellers with verified shop accounts can list on NexTech.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card purple h-100">
+          <div class="stat-icon text-accent-purple"><i class="fa fa-bolt"></i></div>
+          <h5 class="fw-700 mb-2">Instant Checkout</h5>
+          <p style="color:var(--text-muted);font-size:.875rem;margin:0">
+            Seamless cart and checkout flow — order in seconds.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
